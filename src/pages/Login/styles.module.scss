@@ -1,0 +1,31 @@
+.containerLogin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.form {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 50px;
+    text-align: center;
+
+    div {
+        width: 70%;
+    }
+
+    >img {
+        width: 250px;
+        align-self: center;
+    }
+
+
+    button {
+        margin-top: 5rem;
+        gap: 20px;
+        height: 3.5rem;
+        width: 80%;
+    }
+}
