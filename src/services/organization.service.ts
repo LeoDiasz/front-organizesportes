@@ -28,7 +28,6 @@ export class OrganizationService {
 
     async getOrganizationAndMatchWithCode({ inviteCode }: IGetOrganizationAndMatchWithCodeRequest) {
         const { data } = await request.get<IGetListMatchsResponse>(`/organizations/${inviteCode}`);
-        console.log("Data aqui", data)
 
         const dateTime = new Date(data.dateTime);
         dateTime.setHours(dateTime.getHours() + 3);

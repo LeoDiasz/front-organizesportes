@@ -118,8 +118,6 @@ export const DetailsMatch = () => {
             })
 
         }
-
-
     }
 
     const fetchMatch = (idMatch: string, idOrganization: string) => {
@@ -132,9 +130,8 @@ export const DetailsMatch = () => {
     const handleDeleteGuest = (idGuest: string) => {
 
         if (match) {
-            guestServices.deleteGuest({ idMatch: match.id, idGuest }).then(response => {
+            guestServices.deleteGuest({ idMatch: match.id, idGuest }).then(() => {
                 toast.success("Jogador removido com sucesso.");
-                console.log("responsess", response)
                 fetchMatch(match.id, organization?.id!)
 
             }).catch(() => {
