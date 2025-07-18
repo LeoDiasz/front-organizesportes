@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import AppSelect from "../../components/AppSelect";
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import styles from "./styles.module.scss";
 import { MatchServices } from "../../services/match.service";
@@ -30,8 +30,6 @@ interface IForm {
     numberMinPlayers: number;
 }
 const NUMBER_MSG = "Somente número";
-
-
 
 export const validationSchemaCreate = yup.object().shape({
   local: yup
@@ -92,8 +90,10 @@ export const CreateMatch = () => {
     const { organization, setIsLoading, setMatch } = useUserStore();
     const matchServices = MatchServices.getInstance();
     const navigate = useNavigate();
-    const [dateMatch, setDateMatch] = React.useState(dayjs());
-    const [hourMatch, setHourMatch] = React.useState(dayjs());
+    const [dateMatch, setDateMatch] = useState(dayjs());
+    const [hourMatch, setHourMatch] = useState(dayjs());
+    const [messageErrorDate, setMessageErrorDate] = useState("");
+    const [messageErrorTime, setMessageErrorTime] = useState("")
 
     const onSubmit = handleSubmit(async () => {
         setIsLoading(true)
@@ -150,14 +150,55 @@ export const CreateMatch = () => {
                             <DatePicker
                                 label="Data da Partida"
                                 value={dateMatch}
-                                onChange={(newValue) => setDateMatch(newValue!)}
+                                onChange={(newValue) => {
+                                  setDateMatch(newValue!)
+                                  setMessageErrorDate("")
+                                }} 
                                 format="DD/MM/YYYY"
+                                minDate={dayjs()}
+                                onError={(err) => {
+                                  console.log("Error", err)
+                                  if(err === "minDate") {
+                                    setMessageErrorDate("Data não pode ser anterior a hoje.")
+                                  } else if(err === "invalidDate") {
+                                    setMessageErrorDate("Data inválida")
+                                  } else {
+                                    setMessageErrorDate("")
+                                  }
+                                }}
+                                 slotProps={{
+                                  textField: {
+                                    helperText: messageErrorDate
+                                  }
+                                }}
+                               
                             />
                             <TimePicker
                                 label="Hora da Partida"
                                 value={hourMatch}
-                                onChange={(newValue) => setHourMatch(newValue!)}
+                                onChange={(newValue) => {
+                                  console.log("newValue", newValue)
+                                  console.log("dayjs", dayjs)
+                                  setHourMatch(newValue!)
+                           
+                                }} 
                                 format="HH:mm"
+                                minTime={dayjs()}
+                                onError={(err) => {
+                                   if(err === "minTime") {
+                                    setMessageErrorTime("Hora não pode ser anterior ou igual a hora atual.")
+                                  } else if(err === "invalidDate") {
+                                    setMessageErrorTime("Hora inválida")
+                                  } else {
+                                    setMessageErrorTime("")
+                                  }
+                                }}
+                                slotProps={{
+                                  textField: {
+                                    helperText: messageErrorTime
+                                  }
+                                }}
+                             
                             />
                         </div>
                         <AppSelect<IForm>

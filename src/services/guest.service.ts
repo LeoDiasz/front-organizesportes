@@ -1,6 +1,5 @@
 import request from "./api";
 
-
 interface ICreateGuestRequest {
     name: string;
     email: string;
@@ -26,7 +25,6 @@ export class GuestServices {
 
     async createGuest(body: ICreateGuestRequest) {
         const data = await request.post("/guests", body);
-        console.log("Data aqui", data)
 
         return data;
         

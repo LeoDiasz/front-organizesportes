@@ -27,7 +27,7 @@ const AppInput = function <IForm>({
   const inputRef = useMask({ mask: '(00) 00000-0000', replacement: { '0': /\d/ } });
 
   return (
-    <FormControl>
+    <FormControl sx={{width: "100%"}}>
       <TextField
         {...props}
         data-testid={props.name}
@@ -37,9 +37,6 @@ const AppInput = function <IForm>({
         helperText={errorMessage}
         inputRef={isMaskPhone ? inputRef : undefined}
         onChange={(event: any) => {
-
-          console.log(event.target.value)
-
           setValue(props.name as keyof IForm, event.target.value, {
             shouldDirty: true,
             shouldTouch: true,

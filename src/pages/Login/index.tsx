@@ -69,8 +69,6 @@ export const Login = () => {
           }
 
           userServices.loginUser(loginUserBody).then(async (responseToken) => {
-            console.log(responseToken);
-
             toast.success("Login realizado com sucesso!");
             localStorage.setItem("token", responseToken);
 

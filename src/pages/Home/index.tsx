@@ -90,7 +90,7 @@ export const Home = () => {
                             <Stack
                                 gap="1rem"
                                 direction="row"
-                                sx={{ flexWrap: "wrap", justifyContent: "center" }}
+                                sx={{ flexWrap: "wrap", justifyContent: "center", width: "100%" }}
                             >
 
                                 {listForFilterMatch.map(item => (

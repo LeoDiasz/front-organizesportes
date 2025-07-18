@@ -49,8 +49,6 @@ export class MatchServices {
         const hour = dayjs(dateTime).format("HH:mm");
         const date = dayjs(dateTime).format("DD/MM/YYYY");
 
-        console.log("Data", data)
-
         return {...data.data, hour, date};
     }
 
@@ -67,8 +65,6 @@ export class MatchServices {
             return { ...match, date, hour}
         })
 
-        console.log("DataFormated", dataFormmated)
-
         return dataFormmated
     }
 
@@ -81,7 +77,6 @@ export class MatchServices {
         const hour = dayjs(dateTime).format("HH:mm");
         const date = dayjs(dateTime).format("DD/MM/YYYY");
   
-
         const dataFormatted = {
             ...data.data,
             hour,
@@ -89,7 +84,6 @@ export class MatchServices {
         }
 
         return dataFormatted;
-
     }
 
     async cancelMatch(body: ICancelMatchRequest) {

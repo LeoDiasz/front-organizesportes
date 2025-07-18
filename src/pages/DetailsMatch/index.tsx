@@ -224,7 +224,7 @@ export const DetailsMatch = () => {
                                 <Typography variant="body1" color="textSecondary"><strong>Local: </strong>{match?.local}</Typography>
                                 <Typography variant="body1" color="textSecondary"><strong>Data e Hora:</strong> {`${match?.date} as ${match?.hour}`}</Typography>
                                 <Typography variant="body1" color="textSecondary"><strong>Duração:</strong> {match?.duration} {match?.duration > 1 ? "horas" : "hora"}</Typography>
-                                <Typography variant="body1" color="textSecondary"><strong>Min. Jogadores:</strong>{match.numberMinPlayers}</Typography>
+                                <Typography variant="body1" color="textSecondary"><strong>Min. Jogadores: </strong>{match.numberMinPlayers}</Typography>
                                 <Chip label={`Situação: ${match.status}`} color={switchStatus(match.status)} sx={{ color: "#f5f5f5", fontWeight: "bold", marginTop: "0.6rem" }} />
                             </Box>
                             <Stack alignItems={"flex-end"} gap="1rem" sx={{
