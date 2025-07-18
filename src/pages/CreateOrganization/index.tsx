@@ -7,8 +7,7 @@ import { useUserStore } from "../../store/userStore";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
-import * as yup from "yup";
-import { PAGE, REQUIRED_MSG } from "../../constants";
+import { PAGE } from "../../constants";
 import { OrganizationService } from "../../services/organization.service";
 import AddIcon from '@mui/icons-material/Add';
 import logoPng from "../../assets/logo.png";
@@ -32,8 +31,6 @@ export const style = {
     boxShadow: 24,
     p: "4rem 10px",
 };
-
-
 
 export const CreateOrganization = () => {
     const { setOrganization, setIsLoading } = useUserStore();

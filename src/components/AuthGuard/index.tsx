@@ -3,7 +3,6 @@ import { PAGE } from "../../constants";
 import { useLocation, useNavigate } from "react-router-dom";
 import { OrganizationService } from "../../services/organization.service";
 import { useUserStore } from "../../store/userStore";
-import { jwtDecode } from "jwt-decode";
 
 interface IAppGuardProps {
     children: ReactNode;
@@ -25,8 +24,7 @@ export const AuthGuard = ({ children }: IAppGuardProps) => {
                 if (location.pathname === PAGE.CREATE_ORGANIZATION() || location.pathname === PAGE.LOGIN()) {
                     navigate(PAGE.HOME())
                 }
-                console.log("resposta", response);
-            }).catch(err => {
+            }).catch(() => {
                 if(location.pathname === PAGE.CREATE_ORGANIZATION()) {
                     return;
                 }

@@ -1,11 +1,6 @@
 import axios from "axios";
-import { useUserStore } from "../store/userStore";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { PAGE } from "../constants";
 
 const APPLICATION_BFF_URL = "http://localhost:3001";
-
 
 const request = axios.create({
     baseURL: APPLICATION_BFF_URL,
