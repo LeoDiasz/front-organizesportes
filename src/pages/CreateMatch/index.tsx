@@ -1,6 +1,258 @@
+import { Box, Button, Typography } from "@mui/material"
+import { AppContainer } from "../../components/AppContainer"
+import Header from "../../components/Header"
+import AppInput from "../../components/AppInput";
+import { useForm } from "react-hook-form";
+import AppSelect from "../../components/AppSelect";
+import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import React, { useEffect } from "react";
+import dayjs from "dayjs";
+import styles from "./styles.module.scss";
+import { MatchServices } from "../../services/match.service";
+import toast from "react-hot-toast";
+import * as yup from "yup";
+import { useUserStore } from "../../store/userStore";
+import { AppContent } from "../../components/AppContent";
+import { AppNavigation } from "../../components/AppNavigation";
+import { useNavigate } from "react-router-dom";
+import { durationOptions, modalityOptions } from "../../utils/match.utils";
+import { REQUIRED_MSG } from "../../constants";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+interface IForm {
+    local: string;
+    date?: string;
+    hour?: string;
+    duration: string;
+    modality: string;
+    numberMaxPlayers: number;
+    numberMinPlayers: number;
+}
+const NUMBER_MSG = "Somente número";
+
+export const validationSchemaCreate = yup.object().shape({
+  local: yup
+    .string()
+    .required(REQUIRED_MSG),
+//   date: yup
+//     .string()
+//     .required(REQUIRED_MSG)
+//     .test(
+//       'isDateValid',
+//       'Data inválida',
+//       (value) => {
+//         if (!value) return false;
+//         const parsedDate = dayjs(value, 'DD/MM/YYYY', true);
+
+//         return parsedDate.isValid() && parsedDate.isAfter(dayjs(), 'day');
+//       }
+//     ),
+
+//   hour: yup
+//     .string()
+//     .required(REQUIRED_MSG)
+//     .test(
+//       'isHourValid',
+//       'Horário Inválido',
+//       (value) => {
+//         if (!value) return false;
+//         return dayjs(value, 'HH:mm', true).isValid();
+//       }
+//     )
+//     .test(
+//         'isFutureTime',
+//         'O horário não pode ser no passado.',
+//         function(value) {
+//             const { date } = this.parent;
+//             if (!date || !value) return false;
+
+//             const fullDateTime = dayjs(`${date} ${value}`, 'DD/MM/YYYY HH:mm', true);
+//             return fullDateTime.isValid() && fullDateTime.isAfter(dayjs());
+//         }
+//     ),
+
+  duration: yup
+    .string()
+    .required(REQUIRED_MSG)
+     .notOneOf(
+      ['Selecione...'],
+      'Por favor, selecione uma duração válida.'
+    ),
+  modality: yup
+    .string()
+    .required(REQUIRED_MSG)
+    .notOneOf(
+      ['Selecione...'],
+      'Por favor, selecione uma modalidade válida.'
+    ),
+
+  numberMaxPlayers: yup
+    .number()
+    .required(REQUIRED_MSG)
+    .typeError(NUMBER_MSG)
+    .min(1, 'Deve haver pelo menos 1 jogador.')
+    .test(
+      'maxGreaterThanMin',
+      'Não pode ser menor que o minímo de jogadores',
+      function(maxPlayers) {
+        const { numberMinPlayers } = this.parent; 
+        if (typeof numberMinPlayers === 'number' && typeof maxPlayers === 'number') {
+          return maxPlayers >= numberMinPlayers;
+        }
+        return true;
+      }
+    ),
+  numberMinPlayers: yup
+    .number()
+    .typeError(NUMBER_MSG)
+    .required(REQUIRED_MSG)
+    .min(1, 'Deve haver pelo menos 1 jogador.')
+    .test(
+      'minLessThanMax',
+      'Não pode ser maior que o máximo de jogadores',
+      function(minPlayers) {
+        const { numberMaxPlayers } = this.parent; 
+        if (typeof numberMaxPlayers === 'number' && typeof minPlayers === 'number') {
+          return minPlayers <= numberMaxPlayers;
+        }
+        return true;
+      }
+    ),
+});
+
 export const CreateMatch = () => {
-    
+    const { handleSubmit, setValue, getValues, register, formState: { errors, isValid: isValidForm }, reset } = useForm<IForm>({ mode: "all", resolver: yupResolver(validationSchemaCreate),
+        defaultValues: { modality: modalityOptions[0].value, duration: durationOptions[0].value } })
+    const { organization, setIsLoading, setMatch } = useUserStore();
+    const matchServices = MatchServices.getInstance();
+    const navigate = useNavigate();
+    const [dateMatch, setDateMatch] = React.useState(dayjs());
+    const [hourMatch, setHourMatch] = React.useState(dayjs());
+
+    console.log("errors", errors)
+    console.log("isValidForm", isValidForm)
+
+    const onSubmit = handleSubmit(async () => {
+        setIsLoading(true)
+        const date = dateMatch.format("DD/MM/YYYY");
+        const hour = hourMatch.format("HH:mm");
+
+        console.log("Date", date)
+        console.log("Hour", hour)
+
+        const [day, month, year] = date.split("/");
+
+        const dateTimeString = `${year}-${month}-${day}T${hour}:00`
+        const dateObject = new Date(dateTimeString);
+
+        console.log("DateObject", dateObject)
+
+        const body = {
+            numberMaxPlayers: Number(getValues().numberMaxPlayers),
+            numberMinPlayers: Number(getValues().numberMinPlayers),
+            modality: getValues().modality,
+            duration: Number(getValues().duration),
+            hour: hourMatch.format("HH:mm"),
+            date: dateMatch.format("DD/MM/YYYY"),
+            local: getValues().local,
+            organizationId: organization?.id!
+        }
+
+        matchServices.createMatch(body).then(response => {
+            toast.success("Partida criada com sucesso");
+            reset();
+            setDateMatch(dayjs());
+            setHourMatch(dayjs());
+            setMatch(response);
+            navigate(`/partidas/${response.id}`)
+        }).catch(err => {
+            console.log(err)
+            const messageError = err.response.data.error || "Não foi possivel cadastrar a partida."
+            const messageErrorReplace = messageError.replace("Error:", "")
+            setDateMatch(dayjs());
+            setHourMatch(dayjs());
+            toast.error(messageErrorReplace);
+            reset({ local: "", numberMinPlayers: 14, numberMaxPlayers: 16 })
+            console.log(err)
+
+        }).finally(() => setIsLoading(false));
+
+    })
+
+    useEffect(() => {
+
+    }, [reset])
+
+
     return (
-        <></>
+        <AppContainer>
+            <Header />
+            <AppContent>
+                <Typography variant="h4" color="textSecondary" fontWeight="bold">Criar Partida</Typography>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                    <form onSubmit={onSubmit} style={{ width: "80%", display: "flex", flexDirection: "column", gap: "1rem", marginTop: "2rem" }}>
+                        <AppInput<IForm>
+                            {...register("local")}
+                            getValues={getValues}
+                            setValue={setValue}
+                            label="Local"
+                            errorMessage={errors.local?.message}
+                            required
+                        />
+                        <div className={styles.divDatePicker}>
+                            <DatePicker
+                                label="Data da Partida"
+                                value={dateMatch}
+                                onChange={(newValue) => setDateMatch(newValue!)}
+                                format="DD/MM/YYYY"
+                            />
+                            <TimePicker
+                                label="Hora da Partida"
+                                value={hourMatch}
+                                onChange={(newValue) => setHourMatch(newValue!)}
+                                format="HH:mm"
+                            />
+                        </div>
+                        <AppSelect<IForm>
+                            {...register("modality")}
+                            label="Modalidade"
+                            setValue={setValue}
+                            getValues={getValues}
+                            errorMessage={errors.modality?.message}
+                            data={modalityOptions}
+                        />
+                        <AppSelect<IForm>
+                            {...register("duration")}
+                            label="Duração"
+                            setValue={setValue}
+                            getValues={getValues}
+                            errorMessage={errors.duration?.message}
+                            data={durationOptions}
+                        />
+                        <Box sx={{ display: "flex", gap: "20px", width: "100%" }}>
+                            <AppInput<IForm>
+                                {...register("numberMinPlayers")}
+                                getValues={getValues}
+                                setValue={setValue}
+                                label="Minimo de Jogadores"
+                                errorMessage={errors.numberMinPlayers?.message}
+                                required
+                            />
+                            <AppInput<IForm>
+                                {...register("numberMaxPlayers")}
+                                getValues={getValues}
+                                setValue={setValue}
+                                label="Máximo de Jogadores"
+                                errorMessage={errors.numberMaxPlayers?.message}
+                                required
+                            />
+                        </Box>
+                        <Button type="submit" variant="contained" color="secondary" size="large" sx={{ color: "#f2f2f2", fontWeight: "bold", marginTop: "1rem" }} disabled={!isValidForm} >Criar partida</Button>
+                    </form>
+                </LocalizationProvider>
+            </AppContent>
+            <AppNavigation />
+        </AppContainer>
     )
 }

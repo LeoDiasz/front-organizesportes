@@ -1,6 +1,7 @@
-import { FormControl, TextField } from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
 import { forwardRef, type ReactElement, type Ref } from "react";
-import { useMask } from "@react-input/mask";
+import styles from "./styles.module.scss"
+import { DatePicker } from "@mui/x-date-pickers";
 
 interface IAppInputProps<IForm> {
   name: string;
@@ -11,47 +12,35 @@ interface IAppInputProps<IForm> {
   setValue: (name: keyof IForm, value: any, options: any) => void;
   getValues: (name: keyof IForm) => any;
   maxLength?: number | undefined;
-  isMaskPhone?: boolean;
 }
 
 type CompRef = Ref<HTMLSelectElement>;
 
-const AppInput = function <IForm>({
+const AppDatePicker = function <IForm>({
   setValue,
   getValues,
   errorMessage,
-  isMaskPhone,
   ...props
 }: IAppInputProps<IForm>) {
-
-  const inputRef = useMask({ mask: '(00) 00000-0000', replacement: { '0': /\d/ } });
-
   return (
-    <FormControl>
-      <TextField
+    <Box className={styles.boxInput} >
+      <DatePicker
         {...props}
-        data-testid={props.name}
         value={getValues(props.name as keyof IForm)}
-        autoComplete="off"
-        error={errorMessage ? true : false}
-        helperText={errorMessage}
-        inputRef={isMaskPhone ? inputRef : undefined}
-        onChange={(event: any) => {
-
-          console.log(event.target.value)
-
+        format="DD/MM/YYYY"
+        onChange={(event: any) =>
           setValue(props.name as keyof IForm, event.target.value, {
             shouldDirty: true,
             shouldTouch: true,
             shouldValidate: true,
           })
         }
-        }
       />
-    </FormControl>
+      {errorMessage && <Typography variant="body2" sx={{color: "red"}}>{errorMessage}</Typography>}
+    </Box>
   );
 };
 
-export default forwardRef(AppInput) as <IForm>(
+export default forwardRef(AppDatePicker) as <IForm>(
   p: IAppInputProps<IForm> & { ref?: CompRef }
 ) => ReactElement;

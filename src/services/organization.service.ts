@@ -1,35 +1,52 @@
-import { request } from "./api";
+import dayjs from "dayjs";
+import request from "./api";
+import type { IGetListMatchsResponse } from "../model/match.model";
 
-
-
-interface ICreateOrganizationRequest  {
+interface ICreateOrganizationRequest {
     name: string;
-
+    modality: string;
 }
 
-interface ISearchOrganizationRequest {
-
+interface IGetOrganizationAndMatchWithCodeRequest {
+    inviteCode: string;
 }
 
 export class OrganizationService {
     private static INSTANCE: OrganizationService;
 
     async createOrganization(body: ICreateOrganizationRequest) {
-
-        await request.post("/organization/create", body);
-    }
-
-    async getOrganization(body: ISearchOrganizationRequest) {
-        const {data} = await request.get("/organization/:id", {data: body})
+        const data = await request.post("/organizations", body);
 
         return data;
-
     }
 
+    async getOrganization() {
+        const { data } = await request.get("/organizations/email")
 
+        return data;
+    }
+
+    async getOrganizationAndMatchWithCode({ inviteCode }: IGetOrganizationAndMatchWithCodeRequest) {
+        const { data } = await request.get<IGetListMatchsResponse>(`/organizations/${inviteCode}`);
+        console.log("Data aqui", data)
+
+        const dateTime = new Date(data.dateTime);
+        dateTime.setHours(dateTime.getHours() + 3);
+
+        const hour = dayjs(dateTime).format("HH:mm");
+        const date = dayjs(dateTime).format("DD/MM/YYYY");
+
+        const dataFormatted = {
+            ...data,
+            hour,
+            date
+        }
+
+        return dataFormatted;
+    }
 
     static getInstance() {
-        if(!this.INSTANCE) this.INSTANCE = new OrganizationService();
+        if (!this.INSTANCE) this.INSTANCE = new OrganizationService();
         return this.INSTANCE
     }
 }

@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { Box, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { forwardRef, type ReactElement, type Ref } from "react";
 import styles from "./styles.module.scss";
 
@@ -23,19 +23,21 @@ const AppSelect = function <IForm>({
   label,
   ...props
 }: IAppSelectProps<IForm>) {
+
   return (
     <Box className={styles.boxSelect}>
+      <InputLabel sx={{marginBottom: "0.4rem"}}>{label}</InputLabel>
       <Select
         {...props}
         data-testid={props.name}
-        label={label}
+        defaultValue={data && data[0].value}
         value={getValues(props.name as keyof IForm)}
-        onChange={(value: any) =>
-          setValue(props.name as keyof IForm, value, {
+        onChange={(event: any) => {
+          setValue(props.name as keyof IForm, event.target.value, {
             shouldDirty: true,
             shouldTouch: true,
             shouldValidate: true,
-          })
+          })}
         }
       >
         {data &&
@@ -44,7 +46,7 @@ const AppSelect = function <IForm>({
           ))}
       </Select>
       {errorMessage && (
-        <Typography variant="body2" sx={{ color: "red" }}>
+        <Typography variant="body2" fontSize={"0.75rem"} color="error" textAlign="start">
           {errorMessage}
         </Typography>
       )}
