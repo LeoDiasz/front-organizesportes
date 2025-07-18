@@ -71,12 +71,10 @@ export const InviteMatch = () => {
         }
     }, [toggleCreateGuest])
 
-    if (isLoading) {
-        return <CircularProgress />
-    }
 
     const onSubmit = handleSubmit(async () => {
         if (organization && match) {
+            setIsLoading(true);
             const body = {
                 email: getValues().email,
                 name: getValues().name,
@@ -98,9 +96,15 @@ export const InviteMatch = () => {
                 toast.error(errorMessageReplace);
             }).finally(() => {
                 reset({ email: "", phoneNumber: "", name: "", preferencePosition: "" });
+                setIsLoading(false);
             })
         }
     })
+
+    
+    if (isLoading) {
+        return <CircularProgress />
+    }
 
     return (
         <AppContainer>

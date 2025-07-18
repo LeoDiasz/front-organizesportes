@@ -15,6 +15,10 @@ export const voleiOptions = [
     {
         label: "Líbero",
         value: "Líbero",
+    },
+    {
+        label: "Oposto",
+        value: "Oposto"
     }
 
 ];

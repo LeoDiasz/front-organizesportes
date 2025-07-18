@@ -7,10 +7,10 @@ export const validationSchemaCreateOrganization = yup.object().shape({
   name: yup
     .string()
     .required(REQUIRED_MSG)
-    .max(25, 'O nome da organização deve ter no máximo 25 caracteres.')
+    .max(25, 'Máximo 25 caracteres')
     .matches(
-      /^[a-zA-Z\s]*$/,
-      'O nome da organização não pode conter números ou caracteres especiais.'
+      /^\D*$/,
+   'Não pode conter números'
     ),
 
   modality: yup

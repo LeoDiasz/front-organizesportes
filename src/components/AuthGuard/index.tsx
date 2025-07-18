@@ -9,15 +9,15 @@ interface IAppGuardProps {
 }
 
 export const AuthGuard = ({ children }: IAppGuardProps) => {
-    const { setOrganization } = useUserStore();
+    const { setOrganization, setIsLoading } = useUserStore();
     const organizationService = OrganizationService.getInstance();
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-
         if (token) {
+            setIsLoading(true);
             organizationService.getOrganization().then(response => {
                 setOrganization(response);
 
@@ -29,6 +29,8 @@ export const AuthGuard = ({ children }: IAppGuardProps) => {
                     return;
                 }
                 navigate(PAGE.CREATE_ORGANIZATION())
+            }).finally(() => {
+                setIsLoading(false);
             })
         } else {
             navigate(PAGE.LOGIN());

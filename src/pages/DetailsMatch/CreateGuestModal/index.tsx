@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Stack, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, Modal, Stack, Typography } from "@mui/material"
 import { useForm } from "react-hook-form";
 import AppInput from "../../../components/AppInput";
 import AppSelect from "../../../components/AppSelect";
@@ -38,12 +38,13 @@ const style = {
 };
 
 export const CreateGuestModal = ({ isOpen, handleClose, fetchMatch }: ICreateGuestModalProps) => {
-    const { register, reset, handleSubmit, setValue, getValues, formState: { errors, isValid } } = useForm<IForm>({ mode: "all", resolver: yupResolver(validationSchemaCreateGuest), defaultValues: {preferencePosition: "Selecione..."} });
-    const { match, organization } = useUserStore();
+    const { register, reset, handleSubmit, setValue, getValues, formState: { errors, isValid } } = useForm<IForm>({ mode: "all", resolver: yupResolver(validationSchemaCreateGuest), defaultValues: { preferencePosition: "Selecione..." } });
+    const { match, organization, setIsLoading, isLoading } = useUserStore();
     const guestServices = GuestServices.getInstance();
 
     const onSubmit = handleSubmit(async () => {
         if (organization && match) {
+            setIsLoading(true);
             const body = {
                 email: getValues().email,
                 name: getValues().name,
@@ -64,7 +65,8 @@ export const CreateGuestModal = ({ isOpen, handleClose, fetchMatch }: ICreateGue
                 const errorMessageReplace = errorMessage.replace("Error:", "")
                 toast.error(errorMessageReplace);
             }).finally(() => {
-                reset({ email: "", phoneNumber: "", name: "", preferencePosition: "" });
+                reset({ email: "", phoneNumber: "", name: "", preferencePosition: "Selecione..." });
+                setIsLoading(false);
             })
         }
     })
@@ -72,6 +74,10 @@ export const CreateGuestModal = ({ isOpen, handleClose, fetchMatch }: ICreateGue
     useEffect(() => {
 
     }, [match])
+
+    if (isLoading) {
+        return <CircularProgress />
+    }
 
     return (
         <Modal open={isOpen} onClose={handleClose}>

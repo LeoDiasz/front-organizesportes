@@ -31,47 +31,12 @@ interface IForm {
 }
 const NUMBER_MSG = "Somente número";
 
+
+
 export const validationSchemaCreate = yup.object().shape({
   local: yup
     .string()
     .required(REQUIRED_MSG),
-//   date: yup
-//     .string()
-//     .required(REQUIRED_MSG)
-//     .test(
-//       'isDateValid',
-//       'Data inválida',
-//       (value) => {
-//         if (!value) return false;
-//         const parsedDate = dayjs(value, 'DD/MM/YYYY', true);
-
-//         return parsedDate.isValid() && parsedDate.isAfter(dayjs(), 'day');
-//       }
-//     ),
-
-//   hour: yup
-//     .string()
-//     .required(REQUIRED_MSG)
-//     .test(
-//       'isHourValid',
-//       'Horário Inválido',
-//       (value) => {
-//         if (!value) return false;
-//         return dayjs(value, 'HH:mm', true).isValid();
-//       }
-//     )
-//     .test(
-//         'isFutureTime',
-//         'O horário não pode ser no passado.',
-//         function(value) {
-//             const { date } = this.parent;
-//             if (!date || !value) return false;
-
-//             const fullDateTime = dayjs(`${date} ${value}`, 'DD/MM/YYYY HH:mm', true);
-//             return fullDateTime.isValid() && fullDateTime.isAfter(dayjs());
-//         }
-//     ),
-
   duration: yup
     .string()
     .required(REQUIRED_MSG)
@@ -130,31 +95,15 @@ export const CreateMatch = () => {
     const [dateMatch, setDateMatch] = React.useState(dayjs());
     const [hourMatch, setHourMatch] = React.useState(dayjs());
 
-    console.log("errors", errors)
-    console.log("isValidForm", isValidForm)
-
     const onSubmit = handleSubmit(async () => {
         setIsLoading(true)
-        const date = dateMatch.format("DD/MM/YYYY");
-        const hour = hourMatch.format("HH:mm");
-
-        console.log("Date", date)
-        console.log("Hour", hour)
-
-        const [day, month, year] = date.split("/");
-
-        const dateTimeString = `${year}-${month}-${day}T${hour}:00`
-        const dateObject = new Date(dateTimeString);
-
-        console.log("DateObject", dateObject)
-
         const body = {
             numberMaxPlayers: Number(getValues().numberMaxPlayers),
             numberMinPlayers: Number(getValues().numberMinPlayers),
             modality: getValues().modality,
             duration: Number(getValues().duration),
-            hour: hourMatch.format("HH:mm"),
-            date: dateMatch.format("DD/MM/YYYY"),
+            hour: hourMatch && hourMatch.format("HH:mm"),
+            date: dateMatch && dateMatch.format("DD/MM/YYYY"),
             local: getValues().local,
             organizationId: organization?.id!
         }
@@ -167,15 +116,12 @@ export const CreateMatch = () => {
             setMatch(response);
             navigate(`/partidas/${response.id}`)
         }).catch(err => {
-            console.log(err)
             const messageError = err.response.data.error || "Não foi possivel cadastrar a partida."
             const messageErrorReplace = messageError.replace("Error:", "")
             setDateMatch(dayjs());
             setHourMatch(dayjs());
             toast.error(messageErrorReplace);
-            reset({ local: "", numberMinPlayers: 14, numberMaxPlayers: 16 })
-            console.log(err)
-
+            reset({ local: "", numberMinPlayers: 14, numberMaxPlayers: 16, modality: "Selecione...", duration: "Selecione..." })
         }).finally(() => setIsLoading(false));
 
     })

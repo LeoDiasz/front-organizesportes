@@ -17,13 +17,16 @@ import type { IListMatchFormattedResponse } from "../../model/match.model"
 
 export const Home = () => {
     const navigate = useNavigate();
-    const { organization, setMatch } = useUserStore();
+    const { organization, setMatch, setIsLoading } = useUserStore();
     const [listMatchs, setListMatchs] = useState<IListMatchFormattedResponse[]>([]);
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const matchServices = MatchServices.getInstance();
     const [listMatchsFilter, setListMatchsFilter] = useState(listMatchs);
     const [selectedFilterStatus, setSelectedFilterStatus] = useState(filterStatusOptions[0].value);
     let listForFilterMatch = listMatchsFilter.length > 0 ? listMatchsFilter : listMatchs
+
+
+    console.log("ListMatchFilter", listMatchsFilter)
 
     const handleGoCreateMatch = () => {
         navigate(PAGE.CREATE_MATCH());
@@ -32,30 +35,24 @@ export const Home = () => {
 
     const handleChangeFilter = (event: any) => {
         setSelectedFilterStatus(event.target.value)
+        console.log("EventVlaue", event.target.value)
 
         if (event.target.value === "Todas") {
             setListMatchsFilter(listMatchs);
-        } else if (event.target.value === "Cancelada") {
-
-            const listMatchsFiltered = listMatchs.filter(match => match.status === "Cancelada");
-            setListMatchsFilter(listMatchsFiltered);
-        } else if (event.target.value === "Agendada") {
-            const listMatchsFiltered = listMatchsFilter.filter(match => match.status === "Agendada");
-            setListMatchsFilter(listMatchsFiltered)
-        } else if (event.target.value === "Finalizada") {
-            const listMatchsFiltered = listMatchsFilter.filter(match => match.status === "Finalizada");
-            setListMatchsFilter(listMatchsFiltered);
         }
-
+        
+        const listMatchFiltered = listMatchs.filter(match => match.status === event.target.value)
+        setListMatchsFilter(listMatchFiltered);
 
     }
 
     useEffect(() => {
         if (organization) {
+            setIsLoading(true)
             matchServices.getMatchs({ organizationId: organization.id }).then(response => {
                 setListMatchs(response)
 
-            })
+            }).finally(() => setIsLoading(false))
         }
 
     }, [organization])
@@ -97,7 +94,7 @@ export const Home = () => {
                             >
 
                                 {listForFilterMatch.map(item => (
-                                    <Card sx={{ maxWidth: 400, ":hover": { backgroundColor: item.status !== "Cancelada" ? "ButtonShadow" : "rgba(0, 0, 0, 0.26)", cursor: item.status === "Cancelada" ? "default" : "pointer" }, cursor: "pointer", width: "100%", backgroundColor: item.status === "Cancelada" ? "rgba(0, 0, 0, 0.26)" : "inherit" }} onClick={() => {
+                                    <Card sx={{ maxWidth: 600, ":hover": { backgroundColor: item.status !== "Cancelada" ? "ButtonShadow" : "rgba(0, 0, 0, 0.26)", cursor: item.status === "Cancelada" ? "default" : "pointer" }, cursor: "pointer", width: "100%", backgroundColor: item.status === "Cancelada" ? "rgba(0, 0, 0, 0.26)" : "inherit" }} onClick={() => {
 
                                         if (item.status === "Cancelada") {
                                             return;
